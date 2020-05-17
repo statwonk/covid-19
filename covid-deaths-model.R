@@ -1,7 +1,4 @@
 library(tidyverse)
-library(lme4)
-library(plm)
-library(lme4)
 
 ######################################################################
 # COVID-19 Deaths Model
