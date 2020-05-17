@@ -89,7 +89,7 @@ readr::read_csv("Archive/USA_Population_Density.csv", col_types = cols(
   select(-objectid) %>%
   select(county_fips, landarea) %>%
   right_join(d) %>%
-  mutate(vote_share = candidatevotes/totalvotes) %>%
+  mutate(trump_2016_vote_share = candidatevotes/totalvotes) %>%
   mutate(pop_density = popestimate2019/landarea) -> d
 
 d %>%
@@ -102,7 +102,7 @@ d %>%
 d %>%
   select(deaths,
          state, county_fips,
-         overall_period, vote_share, pop_density,
+         overall_period, trump_2016_vote_share, pop_density,
          median_home_value,
          tot_pop, tot_male,
          ba_male, ba_female,
@@ -119,16 +119,16 @@ d %>%
             ba_female = unique(ba_female),
             wa_male = unique(wa_male),
             wa_female = unique(wa_female),
-            vote_share = unique(vote_share),
+            trump_2016_vote_share = unique(trump_2016_vote_share),
             pop_density = unique(pop_density)) %>%
   ungroup() %>%
   mutate(county_fips = factor(county_fips)) -> d
 
 d %>%
   distinct(county_fips, .keep_all = TRUE) %>%
-  select(county_fips, vote_share, pop_density) %>%
-  right_join(d %>% select(-vote_share, -pop_density)) %>%
-  mutate(vote_share = scale(vote_share)[, 1],
+  select(county_fips, trump_2016_vote_share, pop_density) %>%
+  right_join(d %>% select(-trump_2016_vote_share, -pop_density)) %>%
+  mutate(trump_2016_vote_share = scale(trump_2016_vote_share)[, 1],
          pop_density = scale(pop_density)[, 1],
          population = scale(tot_pop)[, 1],
          pct_male = scale(tot_male/tot_pop)[, 1],
@@ -137,7 +137,7 @@ d %>%
          median_home_value = scale(median_home_value)[, 1]) -> d
 
 lm(
-  deaths ~ vote_share +
+  deaths ~ trump_2016_vote_share +
     pop_density +
     median_home_value +
     factor(state) +
@@ -152,4 +152,4 @@ lm(
 broom::tidy(fit) -> params
 params %>% filter(!grepl("factor", term))
 
-# plot(fit)
+plot(fit)
