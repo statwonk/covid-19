@@ -136,12 +136,23 @@ d %>%
          pct_white = scale((wa_female + wa_male)/tot_pop)[, 1],
          median_home_value = scale(median_home_value)[, 1]) -> d
 
+readr::read_csv("ACSST5Y2018.S0101_2020-05-17T200929/ACSST5Y2018.S0101_data_with_overlays_2020-05-10T170648.csv") %>%
+  select(GEO_ID, NAME, S0101_C01_035E) %>%
+  tail(-1) %>%
+  rename(old_age_dependency_ratio = S0101_C01_035E) %>%
+  mutate(county_fips = stringr::str_sub(GEO_ID, -4, -1)) %>%
+  select(county_fips, old_age_dependency_ratio) %>%
+  right_join(d) %>%
+  mutate(old_age_dependency_ratio = as.numeric(old_age_dependency_ratio),
+         old_age_dependency_ratio = scale(old_age_dependency_ratio)[, 1]) -> d
+
 lm(
   deaths ~ trump_2016_vote_share +
     pop_density +
     median_home_value +
     factor(state) +
     factor(overall_period) +
+    old_age_dependency_ratio +
     population +
     pct_male +
     pct_white +
